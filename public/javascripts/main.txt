@@ -1,0 +1,200 @@
+var run_block = function (subject_id,block_no = 0,callback) {
+    /* global vars */
+    base_dir = "/pubstore"
+    sub_dir = base_dir + "/" + subject_id
+    img_dir = sub_dir + "/images"
+    audio_dir = sub_dir + "/audio"
+    csv_dir = sub_dir + "/csv"
+    ITI_dur = 1000
+
+    /* create timeline */
+    var timeline = [];
+
+    /* define welcome message trial */
+    var welcome = {
+        type: "html-keyboard-response",
+        stimulus: "Welcome to the experiment. Press any key to begin."
+    };
+    if(block_no==0) timeline.push(welcome);
+
+
+    /* define instructions trial */
+    if(block_no==0) {
+        var instructions = {
+            type: "html-keyboard-response",
+            stimulus: "<p>Study Session, practice block.</p>" +
+                "<p>In this session, you will listen to a sequence of words sung as a melody.<br>" +
+                "We ask that you pay attention and try to memorize the order of the words.<br>" +
+                "Further, please indicate indicate for each word, whether you believe it represents an animate object (like \"cat\", but unlike \"brick\")<br>" +
+                "(by pressing 'Y' for yes (animate) or 'N' for no (not animate).<br></p>" +
+                "<p>Keep your eyes fixed on the cross throughout the study session.</p>" +
+                "<p>Press any key to begin.</p>",
+            post_trial_gap: 0
+        };
+    }
+    else {
+        var instructions = {
+            type: "html-keyboard-response",
+            stimulus: "<p>Study Session, block " + block_no + " of 24.</p>" +
+                "<p>In this session, you will listen to a sequence of words sung as a melody.<br>" +
+                "We ask that you pay attention and try to memorize the order of the words.<br>" +
+                "Further, please indicate indicate for each word, whether you believe it represents an animate object (like \"cat\", but unlike \"brick\")<br>" +
+                "(by pressing 'Y' for yes (animate) or 'N' for no (not animate).<br></p>" +
+                "<p>Keep your eyes fixed on the cross throughout the study session.</p>" +
+                "<p>Press any key to begin.</p>",
+            post_trial_gap: 0
+        };
+    }
+
+    timeline.push(instructions);
+
+    /* test trials */
+
+    var order_stimuli = [
+    ];
+    for(var i =0;i<5;i++) {
+        order_stimuli.push({stimulus: img_dir + "/block_" + block_no + "_order_" + i + ".png"})
+
+    }
+    var distance_stimuli = [
+    ];
+    for(var i =0;i<5;i++) {
+        distance_stimuli.push({stimulus: img_dir + "/block_" + block_no + "_distance_" + i + ".png"})
+    }
+    var cloud_stimuli = [
+    ];
+    for(var i =0;i<2;i++) {
+        cloud_stimuli.push({stimulus: img_dir + "/block_" + block_no + "_cloud_" + i + ".png"})
+    }
+
+
+    var fixation = {
+        type: 'html-keyboard-response',
+        stimulus: '<div style="font-size:60px;">+</div>',
+        choices: jsPsych.NO_KEYS,
+        trial_duration: ITI_dur,
+
+    }
+    var test_audio = {
+        type: 'audio-keyboard-response',
+        stimulus: audio_dir + "/block_" + block_no + ".mp3" ,
+        trial_ends_after_audio:true,
+        response_ends_trial: false,
+        choices: ['y', 'n'],
+        prompt: "<p>Is the word animate?</p>",
+        data: { name: 'encoding' }
+    };
+
+
+    var test_order = {
+        type: "image-keyboard-response",
+        stimulus: jsPsych.timelineVariable('stimulus'),
+        choices: ['a', 's','k','l'],
+        data: { name: 'order' }
+    }
+    var order_instructions = {type: "html-keyboard-response",
+        stimulus: "<p>You have reached the end of the listening phase for this block.</p>" +
+            "<p>Next you will be given an order memory test.<br>" +
+            "Please press <b>'A'</b> if you're <b>sure</b> that you heard the word on the <b>LEFT</b> first<br>" +
+            "and <b>'S'</b> if you're <b>somewhat sure</b> that you heard the word on the <b>LEFT</b> first<br>" +
+            "Similarly, press <b>'L'</b> if you're <b>sure</b> that you heard the word on the <b>RIGHT</b> first<br>" +
+            "and <b>'K'</b> if you're <b>somewhat sure</b> that you heard the word on the <b>RIGHT</b> first. </p>",
+        post_trial_gap: 0
+    }
+    var order_procedure = {
+        timeline: [fixation, test_order],
+        timeline_variables: order_stimuli
+    }
+
+    var test_distance = {
+        type: "image-keyboard-response",
+        stimulus: jsPsych.timelineVariable('stimulus'),
+        choices: ['z', 'x','n','m'],
+        data: { name: 'distance' }
+    }
+    var distance_instructions = {type: "html-keyboard-response",
+        stimulus: "<p>You have reached the end of the order questions.</p>" +
+            "<p>Next you will be asked questions about the time distance between words.<br>" +
+            "Press:<br>" +
+            "<b>'Z'</b> if you believe that two words appeared <b>very close</b> in time from one another,<br>" +
+            "<b>'X'</b> if you believe they were <b>somewhat close</b>,<br>" +
+            "<b>'M'</b> if you believe the words appeared <b>very far</b> in time from one another, and<br>" +
+            "<b>'N'</b> if you believe they were <b>somewhat far</b>. </p>",
+        post_trial_gap: 0
+    }
+    var distance_procedure = {
+        timeline: [fixation, test_distance],
+        timeline_variables: distance_stimuli
+    }
+
+    var test_cloud = {
+        type: "image-keyboard-response",
+        stimulus: jsPsych.timelineVariable('stimulus'),
+        choices: ['a', 's','k','l'],
+        data: { name: 'cloud' }
+    }
+
+    var cloud_instructions = {type: "html-keyboard-response",
+        stimulus: "<p>You have reached the end of the distance questions.</p>" +
+            "<p>Next, you will be given an additional memory test.<br>" +
+            "Here you will indicate which of the two groups of words<br>" +
+            "has words that appeared adjacent (in time) to one another during the audio playback." +
+            "PLease press <b>'A'</b> if you're <b>sure</b> that the the words on the <b>LEFT</b> were adjacent<br>" +
+            "and <b>'S'</b> if you're <b>somewhat sure</b> that the words on the <b>LEFT</b> were adjacent.<br>" +
+            "Similarly, press <b>'L'</b> if you're <b>sure</b> that you the words on the <b>RIGHT</b> were adjacent<br>" +
+            "and <b>'K'</b> if you're <b>somewhat sure</b> that the words on the <b>RIGHT</b> were adjacent. </p>",
+        post_trial_gap: 0
+    }
+    var cloud_procedure = {
+        timeline: [fixation, test_cloud],
+        timeline_variables: cloud_stimuli
+    }
+    var final_message = {type: "html-keyboard-response",
+        stimulus: "<p>Thank you! You have finished the block.</p>" +
+            "<p>You may now rest, and when you are ready,<br>" +
+            "Press any key to continue.</p>",
+        post_trial_gap: 0
+    }
+    timeline.push(test_audio,order_instructions,order_procedure,distance_instructions,distance_procedure,cloud_instructions,cloud_procedure,final_message);
+    // timeline.push(final_message);
+
+    var save_data = function (callback) {
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', 'save'); // 'write_data.php' is the path to the php file described above.
+        xhr.setRequestHeader('Content-Type', 'application/json');
+        data = jsPsych.data.get().json()
+        xhr.send(JSON.stringify({subject: subject_id, data: data}));
+        xhr.onerror = function() { // only triggers if the request couldn't be made at all
+            alert(`Network Error. Will try again in 5 seconds.`);
+            setTimeout(save_data,5000)
+        };
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState === 4) {
+                if(xhr.status==200) {
+                    callback()
+                }
+            }
+        }
+
+    }
+
+    jsPsych.save_data = save_data
+
+
+
+    /* start the experiment */
+    jsPsych.init({
+        timeline: timeline,
+        default_iti: 0,
+        on_finish: function() {
+            jsPsych.data.addProperties({
+                subject: subject_id,
+                block: block_no,
+                time: new Date()
+            });
+            save_data(callback)
+
+        }
+    });
+
+}

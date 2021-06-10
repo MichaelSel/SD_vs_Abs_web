@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="public/javascripts/lottie.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pizzicato/0.6.4/Pizzicato.min.js"></script>
+
+</head>
+<body>
+<div id="animation_container" style="width: 800px;margin: auto;text-align: center">
+    <input type="button" value="Press here to hear scale" onclick="play_animation('public/animations/6 notes/data.json',[0,2,4,7,9,12,12,9,7,4,2,0],1000,1000)">
+</div>
+
+</body>
+
+<script>
+    let on_screen_animation
+    const base_freq = 261.63/2
+    const note_duration = 1000 //msec
+    const gap_between_notes = 100 //msec
+    const get_freq = function (note,zero_freq=base_freq) {
+        return zero_freq*Math.pow(2,note/12)
+    }
+    const play_note = function (note,duration=note_duration,delay=0) {
+        let soundG = new Pizzicato.Group();
+        for (let i = 0; i < 7; i++) {
+            let sound = new Pizzicato.Sound({
+                source: 'wave',
+                options: {
+                    frequency: (i+1) * get_freq(note),
+                    release: 0.8,
+                    volume: 0.05
+
+                }
+            });
+            soundG.addSound(sound)
+        }
+
+
+        let buf = setTimeout(function () {
+            soundG.play()
+            setTimeout(function () {
+                soundG.stop()
+            },duration)
+        },delay)
+    }
+    const play_melody = function (melody,note_duration=333,gap_before_next=gap_between_notes) {
+        for (let i = 0; i < melody.length; i++) {
+            play_note(melody[i],note_duration-gap_before_next,i*note_duration)
+        }
+    }
+    const play_animation = function (vid_path='public/animations/6 notes/data.json',melody,note_duration=note_duration,melody_start_delay=0) {
+        document.getElementById('animation_container').innerHTML=""
+        if(on_screen_animation) on_screen_animation.destroy()
+        on_screen_animation = bodymovin.loadAnimation({
+            container: document.getElementById('animation_container'),
+            renderer: 'svg',
+            loop:false,
+            autoplay:true,
+            path: vid_path
+        })
+        if(play_melody) setTimeout(function () {play_melody(melody,note_duration)},melody_start_delay)
+
+    }
+
+
+
+</script>
+</html>
